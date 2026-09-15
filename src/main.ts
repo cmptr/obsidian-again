@@ -15,14 +15,21 @@ function getCommandManager(app: App): CommandManager {
 function getCommandPalette(app: App): CommandPalette | undefined {
   const appWithInternalPlugins = app as App & {
     internalPlugins?: {
-      plugins?: Record<
-        string,
-        { instance?: { modal?: CommandPalette } }
-      >;
+      plugins?: Record<string, { instance?: { modal?: unknown } }>;
     };
   };
-  return appWithInternalPlugins.internalPlugins?.plugins?.['command-palette']
-    ?.instance?.modal;
+  const commandPalette =
+    appWithInternalPlugins.internalPlugins?.plugins?.['command-palette']
+      ?.instance?.modal;
+  if (
+    typeof commandPalette !== 'object' ||
+    commandPalette === null ||
+    !('onChooseItem' in commandPalette) ||
+    typeof commandPalette.onChooseItem !== 'function'
+  ) {
+    return undefined;
+  }
+  return commandPalette as CommandPalette;
 }
 
 export default class RepeatPreviousCommandPlugin extends Plugin {

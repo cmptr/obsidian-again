@@ -106,26 +106,33 @@ class FakeCommandPalette {
   }
 }
 
+type PluginInstance = RepeatPreviousCommandPlugin & { unload(): void };
+
+function loadPluginWithApp(app: unknown): PluginInstance {
+  const plugin = new RepeatPreviousCommandPlugin(
+    app as never,
+    { id: PLUGIN_ID } as never,
+  ) as PluginInstance;
+  plugin.onload();
+  return plugin;
+}
+
 function loadPlugin(
   manager = new FakeCommandManager(),
   commandPalette = new FakeCommandPalette(),
 ): {
   manager: FakeCommandManager;
   commandPalette: FakeCommandPalette;
-  plugin: RepeatPreviousCommandPlugin & { unload(): void };
+  plugin: PluginInstance;
 } {
-  const plugin = new RepeatPreviousCommandPlugin(
-    {
-      commands: manager,
-      internalPlugins: {
-        plugins: {
-          'command-palette': { instance: { modal: commandPalette } },
-        },
+  const plugin = loadPluginWithApp({
+    commands: manager,
+    internalPlugins: {
+      plugins: {
+        'command-palette': { instance: { modal: commandPalette } },
       },
-    } as never,
-    { id: PLUGIN_ID } as never,
-  ) as RepeatPreviousCommandPlugin & { unload(): void };
-  plugin.onload();
+    },
+  });
   return { manager, commandPalette, plugin };
 }
 
@@ -166,6 +173,40 @@ describe('Repeat Previous Command', () => {
     manager.executeCommandById(REPEAT_ID);
 
     expect(target.callback).toHaveBeenCalledTimes(2);
+  });
+
+  it.each([
+    ['absent internal plugins', undefined],
+    ['absent modal', { plugins: { 'command-palette': { instance: {} } } }],
+    [
+      'null modal',
+      { plugins: { 'command-palette': { instance: { modal: null } } } },
+    ],
+    [
+      'absent selection handler',
+      { plugins: { 'command-palette': { instance: { modal: {} } } } },
+    ],
+    [
+      'non-callable selection handler',
+      {
+        plugins: {
+          'command-palette': {
+            instance: { modal: { onChooseItem: 'not callable' } },
+          },
+        },
+      },
+    ],
+  ])('skips an unavailable command palette with %s', (_name, internalPlugins) => {
+    const manager = new FakeCommandManager();
+    const before = structuredClone(internalPlugins);
+    let plugin: PluginInstance | undefined;
+
+    expect(() => {
+      plugin = loadPluginWithApp({ commands: manager, internalPlugins });
+    }).not.toThrow();
+    expect(internalPlugins).toEqual(before);
+
+    plugin?.unload();
   });
 
   it('repeats the last attempted command even when it returned false', () => {
@@ -244,6 +285,70 @@ describe('Repeat Previous Command', () => {
     manager.executeCommandById('example:next');
     manager.executeCommandById(REPEAT_ID);
     expect(next).toHaveBeenCalledTimes(2);
+  });
+
+  it('restores a reused command palette across unload and reload', () => {
+    const manager = new FakeCommandManager();
+    const commandPalette = new FakeCommandPalette();
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Method identity is the behavior under test.
+    const original = commandPalette.onChooseItem;
+    const target = addCommand(manager, 'example:palette-target', vi.fn());
+    const first = loadPlugin(manager, commandPalette);
+
+    expect(
+      Object.prototype.hasOwnProperty.call(commandPalette, 'onChooseItem'),
+    ).toBe(true);
+    first.plugin.unload();
+    expect(
+      Object.prototype.hasOwnProperty.call(commandPalette, 'onChooseItem'),
+    ).toBe(false);
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Method identity is the behavior under test.
+    expect(commandPalette.onChooseItem).toBe(original);
+
+    commandPalette.onChooseItem(target);
+    const second = loadPlugin(manager, commandPalette);
+    manager.executeCommandById(REPEAT_ID);
+    expect(obsidianMock.notices).toEqual(['No previous command.']);
+
+    commandPalette.onChooseItem(target);
+    manager.executeCommandById(REPEAT_ID);
+    expect(target.callback).toHaveBeenCalledTimes(3);
+
+    second.plugin.unload();
+    expect(
+      Object.prototype.hasOwnProperty.call(commandPalette, 'onChooseItem'),
+    ).toBe(false);
+  });
+
+  it('detaches the palette observer after a later wrapper is removed', () => {
+    const { commandPalette, manager, plugin } = loadPlugin();
+    const target = addCommand(manager, 'example:palette-target', vi.fn());
+    let laterCalls = 0;
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- The test wrapper forwards the original receiver with apply.
+    const observed = commandPalette.onChooseItem;
+    const later: FakeCommandPalette['onChooseItem'] = function (
+      this: FakeCommandPalette,
+      ...args
+    ) {
+      laterCalls += 1;
+      return observed.apply(this, args);
+    };
+    commandPalette.onChooseItem = later;
+
+    plugin.unload();
+    commandPalette.onChooseItem(target);
+    expect(laterCalls).toBe(1);
+    expect(target.callback).toHaveBeenCalledOnce();
+
+    if (commandPalette.onChooseItem === later) {
+      commandPalette.onChooseItem = observed;
+    }
+    commandPalette.onChooseItem(target);
+
+    expect(target.callback).toHaveBeenCalledTimes(2);
+    expect(
+      Object.prototype.hasOwnProperty.call(commandPalette, 'onChooseItem'),
+    ).toBe(false);
   });
 
   it('starts with empty history after unload and reload', () => {
