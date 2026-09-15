@@ -1,0 +1,10 @@
+{
+  "id": "repeat-previous-command",
+  "name": "Repeat Previous Command",
+  "version": "1.0.0",
+  "minAppVersion": "1.12.7",
+  "description": "Repeat the previously executed command with a user-assigned hotkey.",
+  "author": "Aaron Bell",
+  "authorUrl": "https://github.com/cmptr",
+  "isDesktopOnly": false
+}

@@ -1,1 +1,8 @@
 .worktrees/
+.direnv/
+node_modules/
+main.js
+*.map
+data.json
+result
+.DS_Store
