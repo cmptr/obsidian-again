@@ -6,6 +6,7 @@ import { defineConfig, globalIgnores } from 'eslint/config';
 export default defineConfig(
   globalIgnores([
     '.direnv',
+    '.worktrees',
     'node_modules',
     'main.js',
     'pnpm-lock.yaml',
