@@ -91,6 +91,8 @@ describe('observeCommandExecutions', () => {
   it('becomes an inactive pass-through when a later wrapper remains', () => {
     const calls: string[] = [];
     const manager = createManager();
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Method identity is the behavior under test.
+    const original = manager.executeCommand;
     const observer = vi.fn();
     const removeObserved = observeCommandExecutions(manager, observer);
     const removeLater = wrap(manager, 'later', calls);
@@ -104,6 +106,8 @@ describe('observeCommandExecutions', () => {
     removeLater();
     manager.executeCommand(command('format'));
     expect(observer).not.toHaveBeenCalled();
+    // eslint-disable-next-line @typescript-eslint/unbound-method -- Method identity is the behavior under test.
+    expect(manager.executeCommand).toBe(original);
   });
 
   it('coexists with wrappers installed before and after it', () => {
