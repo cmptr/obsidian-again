@@ -13,9 +13,9 @@ The plugin remembers one command for the current session. Repeated presses keep 
 
 ## Limitations
 
-Obsidian does not expose complete command history through its public plugin API. This plugin narrowly instruments the internal command manager, so an Obsidian update could require a compatibility update.
+Obsidian does not expose complete command history through its public plugin API. This plugin narrowly instruments the internal command manager and command palette selection handler, so an Obsidian update could require a compatibility update.
 
-Actions that do not pass through Obsidian's command manager cannot be repeated.
+Actions that bypass both internal execution paths cannot be repeated.
 
 ## Development
 

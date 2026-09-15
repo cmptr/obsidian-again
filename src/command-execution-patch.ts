@@ -10,42 +10,76 @@ export interface CommandManager {
   findCommand(commandId: string): Command | undefined;
 }
 
+export interface CommandPalette {
+  onChooseItem(
+    this: CommandPalette,
+    command: Command,
+    ...args: unknown[]
+  ): void;
+}
+
 type ExecuteCommand = CommandManager['executeCommand'];
+type ChooseCommand = CommandPalette['onChooseItem'];
 
 export function observeCommandExecutions(
   manager: CommandManager,
   observer: (command: Command) => void,
 ): () => void {
-  const hadOwnMethod = Object.prototype.hasOwnProperty.call(
+  return observeMethodCall<CommandManager, Parameters<ExecuteCommand>, boolean>(
     manager,
     'executeCommand',
+    ([command]) => observer(command),
   );
-  // eslint-disable-next-line @typescript-eslint/unbound-method -- Every invocation below preserves the receiver with apply.
-  const inheritedMethod = manager.executeCommand;
-  const next: ExecuteCommand = hadOwnMethod
+}
+
+export function observeCommandPaletteSelections(
+  commandPalette: CommandPalette,
+  observer: (command: Command) => void,
+): () => void {
+  return observeMethodCall<CommandPalette, Parameters<ChooseCommand>, void>(
+    commandPalette,
+    'onChooseItem',
+    ([command]) => observer(command),
+  );
+}
+
+function observeMethodCall<
+  Target extends object,
+  Args extends unknown[],
+  Result,
+>(
+  target: Target,
+  methodName: keyof Target,
+  observer: (args: Args) => void,
+): () => void {
+  type Method = (this: Target, ...args: Args) => Result;
+  const methodTarget = target as Record<PropertyKey, Method>;
+  const hadOwnMethod = Object.prototype.hasOwnProperty.call(target, methodName);
+  const inheritedMethod = methodTarget[methodName];
+  const next: Method = hadOwnMethod
     ? inheritedMethod
     : function (...args) {
-        const prototype = Object.getPrototypeOf(manager) as Pick<
-          CommandManager,
-          'executeCommand'
+        const prototype = Object.getPrototypeOf(target) as Record<
+          PropertyKey,
+          Method
         >;
-        return prototype.executeCommand.apply(this, args);
+        return prototype[methodName].apply(this, args);
       };
   let active = true;
 
-  const wrapper: ExecuteCommand = function (...args) {
-    if (!active && manager.executeCommand === wrapper) {
+  const wrapper: Method = function (...args) {
+    if (!active && methodTarget[methodName] === wrapper) {
       restore();
-      return manager.executeCommand.apply(this, args);
+      return methodTarget[methodName].apply(this, args);
     }
 
     if (active) {
-      observer(args[0]);
+      observer(args);
     }
     return next.apply(this, args);
   };
 
-  manager.executeCommand = wrapper;
+  methodTarget[methodName] = wrapper;
 
   return () => {
     if (!active) {
@@ -56,13 +90,13 @@ export function observeCommandExecutions(
   };
 
   function restore(): void {
-    if (manager.executeCommand !== wrapper) {
+    if (methodTarget[methodName] !== wrapper) {
       return;
     }
     if (hadOwnMethod) {
-      manager.executeCommand = inheritedMethod;
+      methodTarget[methodName] = inheritedMethod;
     } else {
-      Reflect.deleteProperty(manager, 'executeCommand');
+      Reflect.deleteProperty(target, methodName);
     }
   }
 }

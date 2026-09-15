@@ -1,13 +1,28 @@
 import { Notice, Plugin, type App, type Command } from 'obsidian';
 import {
   observeCommandExecutions,
+  observeCommandPaletteSelections,
   type CommandManager,
+  type CommandPalette,
 } from './command-execution-patch';
 
 const REPEAT_COMMAND_ID = 'repeat-previous-command:repeat-previous';
 
 function getCommandManager(app: App): CommandManager {
   return (app as App & { commands: CommandManager }).commands;
+}
+
+function getCommandPalette(app: App): CommandPalette | undefined {
+  const appWithInternalPlugins = app as App & {
+    internalPlugins?: {
+      plugins?: Record<
+        string,
+        { instance?: { modal?: CommandPalette } }
+      >;
+    };
+  };
+  return appWithInternalPlugins.internalPlugins?.plugins?.['command-palette']
+    ?.instance?.modal;
 }
 
 export default class RepeatPreviousCommandPlugin extends Plugin {
@@ -22,6 +37,15 @@ export default class RepeatPreviousCommandPlugin extends Plugin {
         this.rememberCommand(command);
       }),
     );
+
+    const commandPalette = getCommandPalette(this.app);
+    if (commandPalette !== undefined) {
+      this.register(
+        observeCommandPaletteSelections(commandPalette, (command) => {
+          this.rememberCommand(command);
+        }),
+      );
+    }
 
     this.addCommand({
       id: 'repeat-previous',

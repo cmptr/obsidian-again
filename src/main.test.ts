@@ -17,6 +17,15 @@ const obsidianMock = vi.hoisted(() => {
         add(command: Command): void;
         remove(commandId: string): void;
       };
+      internalPlugins: {
+        plugins: {
+          'command-palette': {
+            instance: {
+              modal: { onChooseItem(command: Command): void };
+            };
+          };
+        };
+      };
     };
     readonly manifest: { id: string };
     private readonly cleanups: Array<() => void> = [];
@@ -91,16 +100,33 @@ class FakeCommandManager implements CommandManager {
   }
 }
 
-function loadPlugin(manager = new FakeCommandManager()): {
+class FakeCommandPalette {
+  onChooseItem(command: Command): void {
+    command.callback?.();
+  }
+}
+
+function loadPlugin(
+  manager = new FakeCommandManager(),
+  commandPalette = new FakeCommandPalette(),
+): {
   manager: FakeCommandManager;
+  commandPalette: FakeCommandPalette;
   plugin: RepeatPreviousCommandPlugin & { unload(): void };
 } {
   const plugin = new RepeatPreviousCommandPlugin(
-    { commands: manager } as never,
+    {
+      commands: manager,
+      internalPlugins: {
+        plugins: {
+          'command-palette': { instance: { modal: commandPalette } },
+        },
+      },
+    } as never,
     { id: PLUGIN_ID } as never,
   ) as RepeatPreviousCommandPlugin & { unload(): void };
   plugin.onload();
-  return { manager, plugin };
+  return { manager, commandPalette, plugin };
 }
 
 function addCommand(
@@ -128,6 +154,18 @@ describe('Repeat Previous Command', () => {
       'No previous command.',
       'No previous command.',
     ]);
+  });
+
+  it('repeats a command selected directly by the command palette', () => {
+    const { commandPalette, manager } = loadPlugin();
+    const target = addCommand(manager, 'example:palette-target', vi.fn());
+    addCommand(manager, 'command-palette:open', vi.fn());
+
+    manager.executeCommandById('command-palette:open');
+    commandPalette.onChooseItem(target);
+    manager.executeCommandById(REPEAT_ID);
+
+    expect(target.callback).toHaveBeenCalledTimes(2);
   });
 
   it('repeats the last attempted command even when it returned false', () => {
