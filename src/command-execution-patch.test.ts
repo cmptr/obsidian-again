@@ -43,6 +43,7 @@ function wrap(
 describe('observeCommandExecutions', () => {
   it('observes before forwarding and preserves receiver, arguments, and result', () => {
     const events: string[] = [];
+    let forwardedArgs: unknown[] = [];
     const manager = createManager();
     // eslint-disable-next-line @typescript-eslint/unbound-method -- The test verifies receiver forwarding with apply.
     const original = manager.executeCommand;
@@ -52,7 +53,8 @@ describe('observeCommandExecutions', () => {
       ...args: unknown[]
     ): boolean {
       expect(this).toBe(manager);
-      events.push(`execute:${commandToRun.id}:${String(args[0])}`);
+      events.push(`execute:${commandToRun.id}`);
+      forwardedArgs = args;
       return original.apply(this, [commandToRun, ...args]);
     };
 
@@ -60,8 +62,11 @@ describe('observeCommandExecutions', () => {
       events.push(`observe:${executed.id}`);
     });
 
-    expect(manager.executeCommand(command('format'), 'context')).toBe(true);
-    expect(events).toEqual(['observe:format', 'execute:format:context']);
+    expect(
+      manager.executeCommand(command('format'), 'context', 42, 'tail'),
+    ).toBe(true);
+    expect(events).toEqual(['observe:format', 'execute:format']);
+    expect(forwardedArgs).toEqual(['context', 42, 'tail']);
   });
 
   it('observes failed and throwing attempts without changing their behavior', () => {

@@ -85,6 +85,10 @@ class FakeCommandManager implements CommandManager {
     this.results.set(commandId, result);
   }
 
+  registeredCommands(): Command[] {
+    return [...this.commands.values()];
+  }
+
   executeCommand(command: Command): boolean {
     command.callback?.();
     return this.results.get(command.id) ?? true;
@@ -151,6 +155,18 @@ beforeEach(() => {
 });
 
 describe('Repeat Previous Command', () => {
+  it('registers exactly one command without a default hotkey', () => {
+    const { manager } = loadPlugin();
+
+    const commands = manager.registeredCommands();
+    expect(commands).toHaveLength(1);
+    expect(commands[0]).toMatchObject({
+      id: REPEAT_ID,
+      name: 'Repeat previous',
+    });
+    expect(commands[0]).not.toHaveProperty('hotkeys');
+  });
+
   it('shows a notice when no previous command exists', () => {
     const { manager } = loadPlugin();
 
@@ -251,6 +267,29 @@ describe('Repeat Previous Command', () => {
 
     expect(targetCallback).toHaveBeenCalledTimes(3);
     expect(nested).toHaveBeenCalledTimes(2);
+  });
+
+  it('keeps tracking suspended after a reentrant repeat returns', () => {
+    const { manager } = loadPlugin();
+    const events: string[] = [];
+    addCommand(manager, 'example:nested', () => events.push('nested'));
+    const target = addCommand(manager, 'example:target', vi.fn());
+
+    manager.executeCommandById(target.id);
+    let replayInvocations = 0;
+    target.callback = () => {
+      events.push('target');
+      replayInvocations += 1;
+      if (replayInvocations === 1) {
+        manager.executeCommandById(REPEAT_ID);
+        manager.executeCommandById('example:nested');
+      }
+    };
+
+    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(REPEAT_ID);
+
+    expect(events).toEqual(['target', 'target', 'nested', 'target']);
   });
 
   it('reports an unavailable target and retains its ID', () => {

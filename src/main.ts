@@ -78,11 +78,12 @@ export default class RepeatPreviousCommandPlugin extends Plugin {
       return undefined;
     }
 
+    const wasReplaying = this.replaying;
     this.replaying = true;
     try {
       return commandManager.executeCommandById(commandId);
     } finally {
-      this.replaying = false;
+      this.replaying = wasReplaying;
     }
   }
 }
