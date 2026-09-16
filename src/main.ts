@@ -6,7 +6,7 @@ import {
   observeCommandPaletteSelections,
 } from './command-execution-patch';
 
-const REPEAT_COMMAND_ID = 'repeat-previous-command:repeat-previous';
+const REPEAT_ACTION_COMMAND_ID = 'repeat-previous-action:repeat-previous';
 const NON_REPEATABLE_COMMAND_IDS = new Set([
   'app:open-another-vault',
   'app:open-help',
@@ -17,7 +17,7 @@ const NON_REPEATABLE_COMMAND_IDS = new Set([
   'app:show-release-notes',
   'app:switch-vault',
   'command-palette:open',
-  REPEAT_COMMAND_ID,
+  REPEAT_ACTION_COMMAND_ID,
   'switcher:open',
 ]);
 
@@ -44,8 +44,8 @@ function getCommandPalette(app: App): CommandPalette | undefined {
   return commandPalette as CommandPalette;
 }
 
-export default class RepeatPreviousCommandPlugin extends Plugin {
-  private previousCommandId: string | undefined;
+export default class RepeatPreviousActionPlugin extends Plugin {
+  private previousActionId: string | undefined;
   private replaying = false;
 
   onload(): void {
@@ -53,7 +53,7 @@ export default class RepeatPreviousCommandPlugin extends Plugin {
 
     this.register(
       observeCommandExecutions(commandManager, (command) => {
-        this.rememberCommand(command);
+        this.rememberAction(command);
       }),
     );
 
@@ -61,7 +61,7 @@ export default class RepeatPreviousCommandPlugin extends Plugin {
     if (commandPalette !== undefined) {
       this.register(
         observeCommandPaletteSelections(commandPalette, (command) => {
-          this.rememberCommand(command);
+          this.rememberAction(command);
         }),
       );
     }
@@ -69,31 +69,31 @@ export default class RepeatPreviousCommandPlugin extends Plugin {
     this.addCommand({
       id: 'repeat-previous',
       name: 'Repeat previous',
-      callback: () => this.repeatPrevious(commandManager),
+      callback: () => this.repeatPreviousAction(commandManager),
     });
   }
 
-  private rememberCommand(command: Command): void {
+  private rememberAction(command: Command): void {
     if (!this.replaying && !NON_REPEATABLE_COMMAND_IDS.has(command.id)) {
-      this.previousCommandId = command.id;
+      this.previousActionId = command.id;
     }
   }
 
-  private repeatPrevious(commandManager: CommandManager): boolean | undefined {
-    const commandId = this.previousCommandId;
-    if (commandId === undefined) {
-      new Notice('No previous command.');
+  private repeatPreviousAction(commandManager: CommandManager): boolean | undefined {
+    const actionId = this.previousActionId;
+    if (actionId === undefined) {
+      new Notice('No previous action.');
       return undefined;
     }
-    if (commandManager.findCommand(commandId) === undefined) {
-      new Notice('Previous command is unavailable.');
+    if (commandManager.findCommand(actionId) === undefined) {
+      new Notice('Previous action is unavailable.');
       return undefined;
     }
 
     const wasReplaying = this.replaying;
     this.replaying = true;
     try {
-      return commandManager.executeCommandById(commandId);
+      return commandManager.executeCommandById(actionId);
     } finally {
       this.replaying = wasReplaying;
     }

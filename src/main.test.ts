@@ -64,9 +64,9 @@ vi.mock('obsidian', () => ({
   Plugin: obsidianMock.Plugin,
 }));
 
-import RepeatPreviousCommandPlugin from './main';
+import RepeatPreviousActionPlugin from './main';
 
-const PLUGIN_ID = 'repeat-previous-command';
+const PLUGIN_ID = 'repeat-previous-action';
 const REPEAT_ID = `${PLUGIN_ID}:repeat-previous`;
 const TRANSIENT_LAUNCHER_IDS = [
   'app:open-another-vault',
@@ -122,10 +122,10 @@ class FakeCommandPalette {
   }
 }
 
-type PluginInstance = RepeatPreviousCommandPlugin & { unload(): void };
+type PluginInstance = RepeatPreviousActionPlugin & { unload(): void };
 
 function loadPluginWithApp(app: unknown): PluginInstance {
-  const plugin = new RepeatPreviousCommandPlugin(
+  const plugin = new RepeatPreviousActionPlugin(
     app as never,
     { id: PLUGIN_ID } as never,
   ) as PluginInstance;
@@ -166,7 +166,7 @@ beforeEach(() => {
   obsidianMock.notices.length = 0;
 });
 
-describe('Repeat Previous Command', () => {
+describe('Repeat Previous Action', () => {
   it('registers exactly one command without a default hotkey', () => {
     const { manager } = loadPlugin();
 
@@ -179,15 +179,15 @@ describe('Repeat Previous Command', () => {
     expect(commands[0]).not.toHaveProperty('hotkeys');
   });
 
-  it('shows a notice when no previous command exists', () => {
+  it('shows a notice when no previous action exists', () => {
     const { manager } = loadPlugin();
 
     manager.executeCommandById(REPEAT_ID);
     manager.executeCommandById(REPEAT_ID);
 
     expect(obsidianMock.notices).toEqual([
-      'No previous command.',
-      'No previous command.',
+      'No previous action.',
+      'No previous action.',
     ]);
   });
 
@@ -346,7 +346,7 @@ describe('Repeat Previous Command', () => {
 
     manager.executeCommandById(REPEAT_ID);
     expect(obsidianMock.notices).toEqual([
-      'Previous command is unavailable.',
+      'Previous action is unavailable.',
     ]);
 
     addCommand(manager, 'example:temporary', callback);
@@ -392,7 +392,7 @@ describe('Repeat Previous Command', () => {
     commandPalette.onChooseItem(target);
     const second = loadPlugin(manager, commandPalette);
     manager.executeCommandById(REPEAT_ID);
-    expect(obsidianMock.notices).toEqual(['No previous command.']);
+    expect(obsidianMock.notices).toEqual(['No previous action.']);
 
     commandPalette.onChooseItem(target);
     manager.executeCommandById(REPEAT_ID);
@@ -445,6 +445,6 @@ describe('Repeat Previous Command', () => {
     loadPlugin(manager);
     manager.executeCommandById(REPEAT_ID);
 
-    expect(obsidianMock.notices).toEqual(['No previous command.']);
+    expect(obsidianMock.notices).toEqual(['No previous action.']);
   });
 });

@@ -1,7 +1,7 @@
 {
-  "name": "repeat-previous-command",
+  "name": "repeat-previous-action",
   "version": "1.0.0",
-  "description": "Repeat the previously executed command with a user-assigned hotkey.",
+  "description": "Repeat the previous Obsidian action with a user-assigned hotkey.",
   "type": "module",
   "main": "main.js",
   "scripts": {
@@ -19,19 +19,19 @@
   },
   "keywords": [
     "obsidian",
-    "command",
+    "action",
     "repeat"
   ],
   "author": "Aaron Bell",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/cmptr/obsidian-repeat-previous-command.git"
+    "url": "git+https://github.com/cmptr/obsidian-repeat-previous-action.git"
   },
   "bugs": {
-    "url": "https://github.com/cmptr/obsidian-repeat-previous-command/issues"
+    "url": "https://github.com/cmptr/obsidian-repeat-previous-action/issues"
   },
-  "homepage": "https://github.com/cmptr/obsidian-repeat-previous-command#readme",
+  "homepage": "https://github.com/cmptr/obsidian-repeat-previous-action#readme",
   "engines": {
     "node": ">=24"
   },

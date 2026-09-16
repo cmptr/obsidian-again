@@ -9,7 +9,7 @@ ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 OBSIDIAN_VAULT ?= $(HOME)/Obsidian/SELF
 VAULT ?= $(OBSIDIAN_VAULT)
 VAULT_EXPANDED := $(patsubst ~/%,$(HOME)/%,$(VAULT))
-PLUGIN_ID := repeat-previous-command
+PLUGIN_ID := repeat-previous-action
 PLUGIN_DIR := $(abspath $(VAULT_EXPANDED))/.obsidian/plugins/$(PLUGIN_ID)
 VERSION := $(shell node -p "require('./manifest.json').version")
 ARTIFACTS := main.js manifest.json
@@ -20,7 +20,7 @@ ARTIFACTS := main.js manifest.json
 	release-patch release-minor release-major
 
 help: ## List available targets.
-	@printf '%s\n' 'Repeat Previous Command development targets' ''
+	@printf '%s\n' 'Repeat Previous Action development targets' ''
 	@awk 'BEGIN { FS = ":.*## " } /^[a-zA-Z0-9_-]+:.*## / { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@printf '\nOverride the vault with: make <target> VAULT=/path/to/vault\n'
 

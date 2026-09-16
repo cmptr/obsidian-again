@@ -8,12 +8,10 @@ import {
 } from './release';
 
 const files = (overrides: Partial<ReleaseFiles> = {}): ReleaseFiles => ({
-  packageJson: `${
-    JSON.stringify({ name: 'repeat-previous-command', version: '1.0.0' }, null, 2)
-  }\n`,
+  packageJson: `${JSON.stringify({ name: 'repeat-previous-action', version: '1.0.0' }, null, 2)}\n`,
   manifestJson: `${
     JSON.stringify(
-      { id: 'repeat-previous-command', version: '1.0.0', minAppVersion: '1.12.7' },
+      { id: 'repeat-previous-action', version: '1.0.0', minAppVersion: '1.12.7' },
       null,
       2,
     )
@@ -111,7 +109,7 @@ describe('localReleaseGitCommands', () => {
     expect(commands).toEqual([
       ['add', 'package.json', 'manifest.json', 'versions.json', 'CHANGELOG.md'],
       ['commit', '-m', 'release: 1.1.0'],
-      ['tag', '-a', '1.1.0', '-m', 'Repeat Previous Command 1.1.0'],
+      ['tag', '-a', '1.1.0', '-m', 'Repeat Previous Action 1.1.0'],
     ]);
     expect(commands.flat()).not.toContain('push');
   });

@@ -1,19 +1,19 @@
-# Repeat Previous Command
+# Repeat Previous Action
 
-Repeat the most recently attempted Obsidian command with a shortcut of your choice.
+Repeat the most recently attempted Obsidian action with a shortcut of your choice.
 
 ## Usage
 
-1. Enable Repeat Previous Command.
+1. Enable Repeat Previous Action.
 2. Open **Settings → Hotkeys**.
-3. Assign a shortcut to **Repeat Previous Command: Repeat previous**.
-4. Run any Obsidian command, then use your shortcut to run it again.
+3. Assign a shortcut to **Repeat Previous Action: Repeat previous**.
+4. Run any repeatable Obsidian action, then use your shortcut to run it again.
 
-The plugin remembers one command for the current session. Repeated presses keep running the same command. The repeat action itself and commands invoked internally during replay do not replace the remembered command.
+The plugin remembers one action for the current session. Repeated presses keep running the same action. The repeat action itself, transient UI launchers, and commands invoked internally during replay do not replace the remembered action.
 
 ## Limitations
 
-Obsidian does not expose complete command history through its public plugin API. This plugin narrowly instruments the internal command manager and command palette selection handler, so an Obsidian update could require a compatibility update.
+Obsidian does not expose complete action history through its public plugin API. This plugin narrowly instruments the internal command manager and command palette selection handler, so an Obsidian update could require a compatibility update.
 
 Actions that bypass both internal execution paths cannot be repeated.
 
