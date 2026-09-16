@@ -68,6 +68,18 @@ import RepeatPreviousCommandPlugin from './main';
 
 const PLUGIN_ID = 'repeat-previous-command';
 const REPEAT_ID = `${PLUGIN_ID}:repeat-previous`;
+const TRANSIENT_LAUNCHER_IDS = [
+  'app:open-another-vault',
+  'app:open-help',
+  'app:open-sandbox-vault',
+  'app:open-settings',
+  'app:open-vault',
+  'app:show-debug-info',
+  'app:show-release-notes',
+  'app:switch-vault',
+  'command-palette:open',
+  'switcher:open',
+] as const;
 
 class FakeCommandManager implements CommandManager {
   private readonly commands = new Map<string, Command>();
@@ -207,6 +219,22 @@ describe('Repeat Previous Command', () => {
     expect(target.callback).toHaveBeenCalledTimes(2);
     expect(openPalette).toHaveBeenCalledTimes(2);
   });
+
+  it.each(TRANSIENT_LAUNCHER_IDS)(
+    'keeps the previous target after transient launcher %s',
+    (launcherId) => {
+      const { manager } = loadPlugin();
+      const target = addCommand(manager, 'example:target', vi.fn());
+      const launcher = addCommand(manager, launcherId, vi.fn());
+
+      manager.executeCommandById(target.id);
+      manager.executeCommandById(launcher.id);
+      manager.executeCommandById(REPEAT_ID);
+
+      expect(target.callback).toHaveBeenCalledTimes(2);
+      expect(launcher.callback).toHaveBeenCalledOnce();
+    },
+  );
 
   it.each([
     ['absent internal plugins', undefined],

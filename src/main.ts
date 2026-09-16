@@ -6,8 +6,20 @@ import {
   observeCommandPaletteSelections,
 } from './command-execution-patch';
 
-const COMMAND_PALETTE_OPEN_ID = 'command-palette:open';
 const REPEAT_COMMAND_ID = 'repeat-previous-command:repeat-previous';
+const NON_REPEATABLE_COMMAND_IDS = new Set([
+  'app:open-another-vault',
+  'app:open-help',
+  'app:open-sandbox-vault',
+  'app:open-settings',
+  'app:open-vault',
+  'app:show-debug-info',
+  'app:show-release-notes',
+  'app:switch-vault',
+  'command-palette:open',
+  REPEAT_COMMAND_ID,
+  'switcher:open',
+]);
 
 function getCommandManager(app: App): CommandManager {
   return (app as App & { commands: CommandManager }).commands;
@@ -62,11 +74,7 @@ export default class RepeatPreviousCommandPlugin extends Plugin {
   }
 
   private rememberCommand(command: Command): void {
-    if (
-      !this.replaying
-      && command.id !== COMMAND_PALETTE_OPEN_ID
-      && command.id !== REPEAT_COMMAND_ID
-    ) {
+    if (!this.replaying && !NON_REPEATABLE_COMMAND_IDS.has(command.id)) {
       this.previousCommandId = command.id;
     }
   }
