@@ -16,5 +16,5 @@
     "target": "ES2021",
     "types": ["node", "vitest/globals"]
   },
-  "include": ["src/**/*.ts", "vitest.config.ts"]
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "vitest.config.ts"]
 }

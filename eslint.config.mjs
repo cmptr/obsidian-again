@@ -18,12 +18,7 @@ export default defineConfig(
       globals: globals.browser,
       parserOptions: {
         projectService: {
-          allowDefaultProject: [
-            'eslint.config.mjs',
-            'esbuild.config.mjs',
-            'manifest.json',
-            'version-bump.mjs',
-          ],
+          allowDefaultProject: ['eslint.config.mjs', 'esbuild.config.mjs', 'manifest.json'],
         },
         tsconfigRootDir: import.meta.dirname,
         extraFileExtensions: ['.json'],
@@ -32,9 +27,14 @@ export default defineConfig(
   },
   ...obsidianmd.configs.recommended,
   {
-    files: ['esbuild.config.mjs', 'version-bump.mjs'],
+    files: ['esbuild.config.mjs', 'scripts/release.ts'],
+    languageOptions: {
+      globals: globals.node,
+    },
     rules: {
+      'no-console': 'off',
       'obsidianmd/no-nodejs-modules': 'off',
+      'obsidianmd/rule-custom-message': 'off',
     },
   },
   {
