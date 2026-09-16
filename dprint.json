@@ -1,0 +1,29 @@
+{
+  "typescript": {
+    "bracePosition": "sameLine",
+    "lineWidth": 100,
+    "quoteStyle": "alwaysSingle",
+    "trailingCommas": "onlyMultiLine"
+  },
+  "json": {
+    "indentWidth": 2
+  },
+  "markdown": {
+    "lineWidth": 100
+  },
+  "excludes": [
+    "**/*-lock.json",
+    "pnpm-lock.yaml",
+    "package.json",
+    "main.js",
+    "coverage/**",
+    ".direnv/**",
+    ".worktrees/**",
+    "docs/superpowers/**"
+  ],
+  "plugins": [
+    "npm:@dprint/typescript@0.96.1",
+    "npm:@dprint/json@0.24.0",
+    "npm:@dprint/markdown@0.24.0"
+  ]
+}

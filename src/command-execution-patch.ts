@@ -58,16 +58,16 @@ function observeMethodCall<
   const inheritedMethod = methodTarget[methodName];
   const next: Method = hadOwnMethod
     ? inheritedMethod
-    : function (...args) {
-        const prototype = Object.getPrototypeOf(target) as Record<
-          PropertyKey,
-          Method
-        >;
-        return prototype[methodName].apply(this, args);
-      };
+    : function(...args) {
+      const prototype = Object.getPrototypeOf(target) as Record<
+        PropertyKey,
+        Method
+      >;
+      return prototype[methodName].apply(this, args);
+    };
   let active = true;
 
-  const wrapper: Method = function (...args) {
+  const wrapper: Method = function(...args) {
     if (!active && methodTarget[methodName] === wrapper) {
       restore();
       return methodTarget[methodName].apply(this, args);

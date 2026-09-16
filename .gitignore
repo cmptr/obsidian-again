@@ -1,6 +1,7 @@
 .worktrees/
 .direnv/
 node_modules/
+coverage/
 main.js
 *.map
 data.json

@@ -1,9 +1,9 @@
-import { Notice, Plugin, type App, type Command } from 'obsidian';
+import { type App, type Command, Notice, Plugin } from 'obsidian';
 import {
-  observeCommandExecutions,
-  observeCommandPaletteSelections,
   type CommandManager,
   type CommandPalette,
+  observeCommandExecutions,
+  observeCommandPaletteSelections,
 } from './command-execution-patch';
 
 const REPEAT_COMMAND_ID = 'repeat-previous-command:repeat-previous';
@@ -18,14 +18,13 @@ function getCommandPalette(app: App): CommandPalette | undefined {
       plugins?: Record<string, { instance?: { modal?: unknown } }>;
     };
   };
-  const commandPalette =
-    appWithInternalPlugins.internalPlugins?.plugins?.['command-palette']
-      ?.instance?.modal;
+  const commandPalette = appWithInternalPlugins.internalPlugins?.plugins?.['command-palette']
+    ?.instance?.modal;
   if (
-    typeof commandPalette !== 'object' ||
-    commandPalette === null ||
-    !('onChooseItem' in commandPalette) ||
-    typeof commandPalette.onChooseItem !== 'function'
+    typeof commandPalette !== 'object'
+    || commandPalette === null
+    || !('onChooseItem' in commandPalette)
+    || typeof commandPalette.onChooseItem !== 'function'
   ) {
     return undefined;
   }

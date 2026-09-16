@@ -1,13 +1,14 @@
 import json from '@eslint/json';
 import obsidianmd from 'eslint-plugin-obsidianmd';
-import globals from 'globals';
 import { defineConfig, globalIgnores } from 'eslint/config';
+import globals from 'globals';
 
 export default defineConfig(
   globalIgnores([
     '.direnv',
     '.worktrees',
     'node_modules',
+    'coverage',
     'main.js',
     'pnpm-lock.yaml',
     'flake.lock',

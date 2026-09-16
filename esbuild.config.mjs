@@ -1,6 +1,6 @@
+import esbuild from 'esbuild';
 import { builtinModules } from 'node:module';
 import process from 'node:process';
-import esbuild from 'esbuild';
 
 const production = process.argv[2] === 'production';
 const context = await esbuild.context({

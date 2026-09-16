@@ -365,7 +365,7 @@ describe('Repeat Previous Command', () => {
     let laterCalls = 0;
     // eslint-disable-next-line @typescript-eslint/unbound-method -- The test wrapper forwards the original receiver with apply.
     const observed = commandPalette.onChooseItem;
-    const later: FakeCommandPalette['onChooseItem'] = function (
+    const later: FakeCommandPalette['onChooseItem'] = function(
       this: FakeCommandPalette,
       ...args
     ) {

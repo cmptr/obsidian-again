@@ -1,9 +1,6 @@
 import type { Command } from 'obsidian';
 import { describe, expect, it, vi } from 'vitest';
-import {
-  observeCommandExecutions,
-  type CommandManager,
-} from './command-execution-patch';
+import { type CommandManager, observeCommandExecutions } from './command-execution-patch';
 
 const command = (id: string): Command => ({ id, name: id });
 
@@ -27,7 +24,7 @@ function wrap(
 ): () => void {
   // eslint-disable-next-line @typescript-eslint/unbound-method -- The helper forwards the original receiver with apply.
   const next = manager.executeCommand;
-  const wrapper: CommandManager['executeCommand'] = function (...args) {
+  const wrapper: CommandManager['executeCommand'] = function(...args) {
     calls.push(label);
     return next.apply(this, args);
   };
@@ -47,7 +44,7 @@ describe('observeCommandExecutions', () => {
     const manager = createManager();
     // eslint-disable-next-line @typescript-eslint/unbound-method -- The test verifies receiver forwarding with apply.
     const original = manager.executeCommand;
-    manager.executeCommand = function (
+    manager.executeCommand = function(
       this: CommandManager,
       commandToRun: Command,
       ...args: unknown[]
