@@ -32,8 +32,13 @@ export default defineConfig(
       globals: globals.node,
     },
     rules: {
-      'no-console': 'off',
       'obsidianmd/no-nodejs-modules': 'off',
+    },
+  },
+  {
+    files: ['scripts/release.ts'],
+    rules: {
+      'no-console': 'off',
       'obsidianmd/rule-custom-message': 'off',
     },
   },
