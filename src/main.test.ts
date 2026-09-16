@@ -191,6 +191,23 @@ describe('Repeat Previous Command', () => {
     expect(target.callback).toHaveBeenCalledTimes(2);
   });
 
+  it('repeats the selected command when Repeat previous is chosen from the palette', () => {
+    const { commandPalette, manager } = loadPlugin();
+    const target = addCommand(manager, 'example:palette-target', vi.fn());
+    const openPalette = vi.fn();
+    addCommand(manager, 'command-palette:open', openPalette);
+    const repeat = manager.findCommand(REPEAT_ID);
+    expect(repeat).toBeDefined();
+
+    manager.executeCommandById('command-palette:open');
+    commandPalette.onChooseItem(target);
+    manager.executeCommandById('command-palette:open');
+    commandPalette.onChooseItem(repeat!);
+
+    expect(target.callback).toHaveBeenCalledTimes(2);
+    expect(openPalette).toHaveBeenCalledTimes(2);
+  });
+
   it.each([
     ['absent internal plugins', undefined],
     ['absent modal', { plugins: { 'command-palette': { instance: {} } } }],

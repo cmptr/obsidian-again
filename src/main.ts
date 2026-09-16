@@ -6,6 +6,7 @@ import {
   observeCommandPaletteSelections,
 } from './command-execution-patch';
 
+const COMMAND_PALETTE_OPEN_ID = 'command-palette:open';
 const REPEAT_COMMAND_ID = 'repeat-previous-command:repeat-previous';
 
 function getCommandManager(app: App): CommandManager {
@@ -61,7 +62,11 @@ export default class RepeatPreviousCommandPlugin extends Plugin {
   }
 
   private rememberCommand(command: Command): void {
-    if (!this.replaying && command.id !== REPEAT_COMMAND_ID) {
+    if (
+      !this.replaying
+      && command.id !== COMMAND_PALETTE_OPEN_ID
+      && command.id !== REPEAT_COMMAND_ID
+    ) {
       this.previousCommandId = command.id;
     }
   }
