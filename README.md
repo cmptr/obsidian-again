@@ -24,12 +24,43 @@ Requirements:
 - Node.js 24
 - pnpm 10.20.0 through Corepack
 
+The Makefile is the main development entry point:
+
 ```sh
 corepack pnpm install
-corepack pnpm check
+make help
+make check
 ```
 
-`pnpm dev` watches the TypeScript source and writes `main.js`. The production bundle and `manifest.json` are attached to tagged GitHub releases.
+`make dev` builds the plugin, symlinks `main.js` and `manifest.json` into
+`$HOME/Obsidian/SELF`, and starts the TypeScript watcher. Override the vault for any vault
+target:
+
+```sh
+make link VAULT=/path/to/vault
+make reload VAULT=/path/to/vault
+make unlink VAULT=/path/to/vault
+```
+
+`reload` requires the Hot Reload community plugin. Vault targets remove a stale `styles.css`, but
+this plugin does not create or ship one.
+
+The production bundle remains at `main.js` in the repository root. `make check` verifies formatting,
+lint, types, 90% coverage thresholds, tests, and the production build.
+
+### Releases
+
+Add release notes under `Unreleased` in `CHANGELOG.md`, commit them, and cut a local release from a
+clean `main` branch:
+
+```sh
+make release-patch # or release-minor / release-major
+```
+
+The release target synchronizes version files, runs the full quality gate, creates a local commit and
+annotated tag, then prints the explicit push command. It never pushes or publishes automatically.
+After the tag is deliberately pushed, the GitHub workflow creates the draft release with root-level
+`main.js` and `manifest.json` artifacts.
 
 ## License
 
