@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-04-28
+
 - Renamed the plugin command to Previous with the ID `again:previous`.
 - Added build provenance attestations for release artifacts.
 - Added a contribution guide.
