@@ -1,6 +1,6 @@
 {
   "name": "obsidian-again",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "Repeat the previous Obsidian command with a user-assigned hotkey.",
   "type": "module",
   "main": "main.js",

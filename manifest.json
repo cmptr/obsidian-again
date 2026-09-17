@@ -1,7 +1,7 @@
 {
   "id": "again",
   "name": "Again",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "minAppVersion": "1.12.7",
   "description": "Repeat the previous command with a user-assigned hotkey.",
   "author": "Aaron Bell",
