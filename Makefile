@@ -9,10 +9,10 @@ ROOT_DIR := $(abspath $(dir $(lastword $(MAKEFILE_LIST))))
 OBSIDIAN_VAULT ?= $(HOME)/Obsidian/SELF
 VAULT ?= $(OBSIDIAN_VAULT)
 VAULT_EXPANDED := $(patsubst ~/%,$(HOME)/%,$(VAULT))
-PLUGIN_ID := repeat-previous-action
-PLUGIN_DIR := $(abspath $(VAULT_EXPANDED))/.obsidian/plugins/$(PLUGIN_ID)
+PLUGIN_ID := again
+PLUGIN_DIR := $(VAULT_EXPANDED)/.obsidian/plugins/$(PLUGIN_ID)
 VERSION := $(shell node -p "require('./manifest.json').version")
-ARTIFACTS := main.js manifest.json
+ARTIFACTS := main.js manifest.json styles.css
 
 .PHONY: help install dev build typecheck lint format test test-watch check clean \
 	validate-vault link symlink unlink reload require-version require-bump \
@@ -20,7 +20,7 @@ ARTIFACTS := main.js manifest.json
 	release-patch release-minor release-major
 
 help: ## List available targets.
-	@printf '%s\n' 'Repeat Previous Action development targets' ''
+	@printf '%s\n' 'Again development targets' ''
 	@awk 'BEGIN { FS = ":.*## " } /^[a-zA-Z0-9_-]+:.*## / { printf "  %-20s %s\n", $$1, $$2 }' $(MAKEFILE_LIST)
 	@printf '\nOverride the vault with: make <target> VAULT=/path/to/vault\n'
 
@@ -59,8 +59,8 @@ validate-vault: ## Verify VAULT is an Obsidian vault.
 		echo 'VAULT must not be empty.' >&2; \
 		exit 1; \
 	fi
-	@if [ ! -d "$(abspath $(VAULT_EXPANDED))/.obsidian" ]; then \
-		echo 'Not an Obsidian vault: $(abspath $(VAULT_EXPANDED))' >&2; \
+	@if [ ! -d "$(VAULT_EXPANDED)/.obsidian" ]; then \
+		echo 'Not an Obsidian vault: $(VAULT_EXPANDED)' >&2; \
 		exit 1; \
 	fi
 
@@ -70,7 +70,7 @@ link: build validate-vault ## Copy plugin artifacts into the selected vault.
 		exit 1; \
 	fi
 	@mkdir -p "$(PLUGIN_DIR)"
-	@rm -f "$(PLUGIN_DIR)/main.js" "$(PLUGIN_DIR)/manifest.json" "$(PLUGIN_DIR)/styles.css"
+	@for artifact in $(ARTIFACTS); do rm -f "$(PLUGIN_DIR)/$$artifact"; done
 	@for artifact in $(ARTIFACTS); do install -m 0644 "$$artifact" "$(PLUGIN_DIR)/$$artifact"; done
 	@echo 'Installed $(PLUGIN_ID) in $(PLUGIN_DIR)'
 
@@ -80,7 +80,7 @@ symlink: build validate-vault ## Symlink plugin artifacts into the selected vaul
 		exit 1; \
 	fi
 	@mkdir -p "$(PLUGIN_DIR)"
-	@rm -f "$(PLUGIN_DIR)/main.js" "$(PLUGIN_DIR)/manifest.json" "$(PLUGIN_DIR)/styles.css"
+	@for artifact in $(ARTIFACTS); do rm -f "$(PLUGIN_DIR)/$$artifact"; done
 	@for artifact in $(ARTIFACTS); do ln -s "$(ROOT_DIR)/$$artifact" "$(PLUGIN_DIR)/$$artifact"; done
 	@echo 'Linked $(PLUGIN_ID) in $(PLUGIN_DIR)'
 

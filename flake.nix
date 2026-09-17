@@ -1,5 +1,5 @@
 {
-  description = "Development environment for Repeat Previous Action";
+  description = "Development environment for Again";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 

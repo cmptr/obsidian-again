@@ -8,10 +8,10 @@ import {
 } from './release';
 
 const files = (overrides: Partial<ReleaseFiles> = {}): ReleaseFiles => ({
-  packageJson: `${JSON.stringify({ name: 'repeat-previous-action', version: '1.0.0' }, null, 2)}\n`,
+  packageJson: `${JSON.stringify({ name: 'obsidian-again', version: '1.0.0' }, null, 2)}\n`,
   manifestJson: `${
     JSON.stringify(
-      { id: 'repeat-previous-action', version: '1.0.0', minAppVersion: '1.12.7' },
+      { id: 'again', version: '1.0.0', minAppVersion: '1.12.7' },
       null,
       2,
     )
@@ -53,8 +53,14 @@ describe('prepareReleaseFiles', () => {
   it('synchronizes versions and moves Unreleased notes', () => {
     const prepared = prepareReleaseFiles(files(), '1.1.0', '2026-05-01');
 
-    expect(JSON.parse(prepared.packageJson)).toMatchObject({ version: '1.1.0' });
-    expect(JSON.parse(prepared.manifestJson)).toMatchObject({ version: '1.1.0' });
+    expect(JSON.parse(prepared.packageJson)).toMatchObject({
+      name: 'obsidian-again',
+      version: '1.1.0',
+    });
+    expect(JSON.parse(prepared.manifestJson)).toMatchObject({
+      id: 'again',
+      version: '1.1.0',
+    });
     expect(JSON.parse(prepared.versionsJson)).toEqual({
       '1.0.0': '1.12.7',
       '1.1.0': '1.12.7',
@@ -109,7 +115,7 @@ describe('localReleaseGitCommands', () => {
     expect(commands).toEqual([
       ['add', 'package.json', 'manifest.json', 'versions.json', 'CHANGELOG.md'],
       ['commit', '-m', 'release: 1.1.0'],
-      ['tag', '-a', '1.1.0', '-m', 'Repeat Previous Action 1.1.0'],
+      ['tag', '-a', '1.1.0', '-m', 'Again 1.1.0'],
     ]);
     expect(commands.flat()).not.toContain('push');
   });

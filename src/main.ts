@@ -17,7 +17,7 @@ import {
   observeCommandPaletteSelections,
 } from './command-execution-patch';
 
-const REPEAT_ACTION_COMMAND_ID = 'repeat-previous-action:repeat-previous';
+const PREVIOUS_COMMAND_ID = 'again:previous-command';
 const NON_REPEATABLE_COMMAND_IDS = new Set([
   'app:open-another-vault',
   'app:open-help',
@@ -28,7 +28,7 @@ const NON_REPEATABLE_COMMAND_IDS = new Set([
   'app:show-release-notes',
   'app:switch-vault',
   'command-palette:open',
-  REPEAT_ACTION_COMMAND_ID,
+  PREVIOUS_COMMAND_ID,
   'switcher:open',
 ]);
 const STATUS_BAR_MODES = ['hidden', 'icon', 'icon-and-command'] as const;
@@ -135,7 +135,7 @@ class AgainSettingTab extends PluginSettingTab {
   }
 }
 
-export default class RepeatPreviousActionPlugin extends Plugin {
+export default class AgainPlugin extends Plugin {
   private previousCommand: PreviousCommand | undefined;
   private replaying = false;
   private pluginSettings: AgainSettings = DEFAULT_SETTINGS;
@@ -163,7 +163,7 @@ export default class RepeatPreviousActionPlugin extends Plugin {
 
     this.register(
       observeCommandExecutions(commandManager, (command) => {
-        this.rememberAction(command);
+        this.rememberCommand(command);
       }),
     );
 
@@ -171,15 +171,15 @@ export default class RepeatPreviousActionPlugin extends Plugin {
     if (commandPalette !== undefined) {
       this.register(
         observeCommandPaletteSelections(commandPalette, (command) => {
-          this.rememberAction(command);
+          this.rememberCommand(command);
         }),
       );
     }
 
     this.addCommand({
-      id: 'repeat-previous',
-      name: 'Repeat previous',
-      callback: () => this.repeatPreviousAction(commandManager),
+      id: 'previous-command',
+      name: 'Previous command',
+      callback: () => this.repeatPreviousCommand(commandManager),
     });
   }
 
@@ -198,7 +198,7 @@ export default class RepeatPreviousActionPlugin extends Plugin {
     this.pluginSettings = { statusBarMode: DEFAULT_SETTINGS.statusBarMode };
   }
 
-  private rememberAction(command: Command): void {
+  private rememberCommand(command: Command): void {
     if (!this.replaying && !NON_REPEATABLE_COMMAND_IDS.has(command.id)) {
       this.previousCommand = { id: command.id, name: command.name };
       this.renderStatusBar();
@@ -238,21 +238,21 @@ export default class RepeatPreviousActionPlugin extends Plugin {
     statusBarItem.setAttribute('aria-label', tooltip);
   }
 
-  private repeatPreviousAction(commandManager: CommandManager): boolean | undefined {
-    const actionId = this.previousCommand?.id;
-    if (actionId === undefined) {
-      new Notice('No previous action.');
+  private repeatPreviousCommand(commandManager: CommandManager): boolean | undefined {
+    const commandId = this.previousCommand?.id;
+    if (commandId === undefined) {
+      new Notice('No previous command.');
       return undefined;
     }
-    if (commandManager.findCommand(actionId) === undefined) {
-      new Notice('Previous action is unavailable.');
+    if (commandManager.findCommand(commandId) === undefined) {
+      new Notice('Previous command is unavailable.');
       return undefined;
     }
 
     const wasReplaying = this.replaying;
     this.replaying = true;
     try {
-      return commandManager.executeCommandById(actionId);
+      return commandManager.executeCommandById(commandId);
     } finally {
       this.replaying = wasReplaying;
     }

@@ -137,7 +137,7 @@ export function localReleaseGitCommands(version: string): readonly GitCommand[] 
   return [
     ['add', ...RELEASE_FILES],
     ['commit', '-m', `release: ${version}`],
-    ['tag', '-a', version, '-m', `Repeat Previous Action ${version}`],
+    ['tag', '-a', version, '-m', `Again ${version}`],
   ];
 }
 
@@ -213,7 +213,7 @@ function pretag(version: string): void {
   assertCleanMain();
   assertTagMissing(version);
   validate(version);
-  run('git', 'tag', '-a', version, '-m', `Repeat Previous Action ${version}`);
+  run('git', 'tag', '-a', version, '-m', `Again ${version}`);
   printPushCommand(version);
 }
 

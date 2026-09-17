@@ -245,10 +245,10 @@ vi.mock('obsidian', () => ({
   setTooltip: obsidianMock.setTooltip,
 }));
 
-import RepeatPreviousActionPlugin from './main';
+import AgainPlugin from './main';
 
-const PLUGIN_ID = 'repeat-previous-action';
-const REPEAT_ID = `${PLUGIN_ID}:repeat-previous`;
+const PLUGIN_ID = 'again';
+const PREVIOUS_COMMAND_ID = `${PLUGIN_ID}:previous-command`;
 const TRANSIENT_LAUNCHER_IDS = [
   'app:open-another-vault',
   'app:open-help',
@@ -303,7 +303,7 @@ class FakeCommandPalette {
   }
 }
 
-type PluginInstance = RepeatPreviousActionPlugin & { unload(): void };
+type PluginInstance = AgainPlugin & { unload(): void };
 
 interface LoadOptions {
   data?: unknown;
@@ -316,7 +316,7 @@ async function loadPluginWithApp(
 ): Promise<PluginInstance> {
   obsidianMock.data = options.data;
   obsidianMock.Platform.isMobile = options.mobile ?? false;
-  const plugin = new RepeatPreviousActionPlugin(
+  const plugin = new AgainPlugin(
     app as never,
     { id: PLUGIN_ID } as never,
   ) as PluginInstance;
@@ -412,15 +412,15 @@ beforeEach(() => {
   obsidianMock.statusItems.length = 0;
 });
 
-describe('Repeat Previous Action', () => {
+describe('Again', () => {
   it('registers exactly one command without a default hotkey', async () => {
     const { manager } = await loadPlugin();
 
     const commands = manager.registeredCommands();
     expect(commands).toHaveLength(1);
     expect(commands[0]).toMatchObject({
-      id: REPEAT_ID,
-      name: 'Repeat previous',
+      id: PREVIOUS_COMMAND_ID,
+      name: 'Previous command',
     });
     expect(commands[0]).not.toHaveProperty('hotkeys');
   });
@@ -620,22 +620,22 @@ describe('Repeat Previous Action', () => {
     const target = addCommand(manager, 'example:format', vi.fn());
 
     manager.executeCommandById(target.id);
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
     expect(statusItem).toBeUndefined();
     expect(obsidianMock.statusItems).toEqual([]);
     expect(target.callback).toHaveBeenCalledTimes(2);
   });
 
-  it('shows a notice when no previous action exists', async () => {
+  it('shows a notice when no previous command exists', async () => {
     const { manager } = await loadPlugin();
 
-    manager.executeCommandById(REPEAT_ID);
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
     expect(obsidianMock.notices).toEqual([
-      'No previous action.',
-      'No previous action.',
+      'No previous command.',
+      'No previous command.',
     ]);
   });
 
@@ -646,17 +646,17 @@ describe('Repeat Previous Action', () => {
 
     manager.executeCommandById('command-palette:open');
     commandPalette.onChooseItem(target);
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
     expect(target.callback).toHaveBeenCalledTimes(2);
   });
 
-  it('repeats the selected command when Repeat previous is chosen from the palette', async () => {
+  it('repeats the selected command when Previous command is chosen from the palette', async () => {
     const { commandPalette, manager } = await loadPlugin();
     const target = addCommand(manager, 'example:palette-target', vi.fn());
     const openPalette = vi.fn();
     addCommand(manager, 'command-palette:open', openPalette);
-    const repeat = manager.findCommand(REPEAT_ID);
+    const repeat = manager.findCommand(PREVIOUS_COMMAND_ID);
     expect(repeat).toBeDefined();
 
     manager.executeCommandById('command-palette:open');
@@ -682,7 +682,7 @@ describe('Repeat Previous Action', () => {
 
       manager.executeCommandById(target.id);
       manager.executeCommandById(launcher.id);
-      manager.executeCommandById(REPEAT_ID);
+      manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
       expect(target.callback).toHaveBeenCalledTimes(2);
       expect(launcher.callback).toHaveBeenCalledOnce();
@@ -734,7 +734,7 @@ describe('Repeat Previous Action', () => {
 
     expect(manager.executeCommandById('example:format')).toBe(false);
     expect(statusItem.text).toBe('Format document');
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
     expect(callback).toHaveBeenCalledTimes(2);
     expect(statusItem.text).toBe('Format document');
@@ -754,7 +754,7 @@ describe('Repeat Previous Action', () => {
     expect(() => manager.executeCommandById(target.id)).toThrow('target failed');
     expect(statusItem.text).toBe('Throw target');
     target.callback = vi.fn();
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
     expect(target.callback).toHaveBeenCalledOnce();
     expect(statusItem.text).toBe('Throw target');
@@ -777,8 +777,8 @@ describe('Repeat Previous Action', () => {
       targetCallback();
       manager.executeCommandById('example:nested');
     };
-    manager.executeCommandById(REPEAT_ID);
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
     expect(targetCallback).toHaveBeenCalledTimes(3);
     expect(nested).toHaveBeenCalledTimes(2);
@@ -797,13 +797,13 @@ describe('Repeat Previous Action', () => {
       events.push('target');
       replayInvocations += 1;
       if (replayInvocations === 1) {
-        manager.executeCommandById(REPEAT_ID);
+        manager.executeCommandById(PREVIOUS_COMMAND_ID);
         manager.executeCommandById('example:nested');
       }
     };
 
-    manager.executeCommandById(REPEAT_ID);
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
     expect(events).toEqual(['target', 'target', 'nested', 'target']);
   });
@@ -820,9 +820,9 @@ describe('Repeat Previous Action', () => {
     manager.executeCommandById('example:temporary');
     manager.remove('example:temporary');
 
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
     expect(obsidianMock.notices).toEqual([
-      'Previous action is unavailable.',
+      'Previous command is unavailable.',
     ]);
     expect(statusItem.text).toBe('Temporary command');
     expect(statusItem.tooltip).toBe('Previous command: Temporary command');
@@ -833,7 +833,7 @@ describe('Repeat Previous Action', () => {
       callback,
       'Renamed command',
     );
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
     expect(callback).toHaveBeenCalledTimes(2);
     expect(statusItem.text).toBe('Temporary command');
   });
@@ -846,12 +846,12 @@ describe('Repeat Previous Action', () => {
       throw new Error('replay failed');
     };
 
-    expect(() => manager.executeCommandById(REPEAT_ID)).toThrow('replay failed');
+    expect(() => manager.executeCommandById(PREVIOUS_COMMAND_ID)).toThrow('replay failed');
 
     const next = vi.fn();
     addCommand(manager, 'example:next', next);
     manager.executeCommandById('example:next');
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
     expect(next).toHaveBeenCalledTimes(2);
   });
 
@@ -875,11 +875,11 @@ describe('Repeat Previous Action', () => {
 
     commandPalette.onChooseItem(target);
     const second = await loadPlugin(manager, commandPalette);
-    manager.executeCommandById(REPEAT_ID);
-    expect(obsidianMock.notices).toEqual(['No previous action.']);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
+    expect(obsidianMock.notices).toEqual(['No previous command.']);
 
     commandPalette.onChooseItem(target);
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
     expect(target.callback).toHaveBeenCalledTimes(3);
 
     second.plugin.unload();
@@ -927,8 +927,8 @@ describe('Repeat Previous Action', () => {
     first.plugin.unload();
 
     await loadPlugin(manager);
-    manager.executeCommandById(REPEAT_ID);
+    manager.executeCommandById(PREVIOUS_COMMAND_ID);
 
-    expect(obsidianMock.notices).toEqual(['No previous action.']);
+    expect(obsidianMock.notices).toEqual(['No previous command.']);
   });
 });

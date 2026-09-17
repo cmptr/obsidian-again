@@ -27,6 +27,14 @@ export default defineConfig(
   },
   ...obsidianmd.configs.recommended,
   {
+    files: ['src/main.ts'],
+    rules: {
+      // Again's public command identity intentionally uses the required product terminology.
+      'obsidianmd/commands/no-command-in-command-id': 'off',
+      'obsidianmd/commands/no-command-in-command-name': 'off',
+    },
+  },
+  {
     files: ['esbuild.config.mjs', 'scripts/release.ts'],
     languageOptions: {
       globals: globals.node,
