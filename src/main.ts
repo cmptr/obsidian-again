@@ -233,9 +233,11 @@ export default class AgainPlugin extends Plugin {
       });
     }
 
-    const tooltip = `Previous command: ${previousCommand.name}`;
-    setTooltip(statusBarItem, tooltip);
-    statusBarItem.setAttribute('aria-label', tooltip);
+    const accessibleLabel = `Previous command: ${previousCommand.name}`;
+    if (this.pluginSettings.statusBarMode === 'icon') {
+      setTooltip(statusBarItem, accessibleLabel);
+    }
+    statusBarItem.setAttribute('aria-label', accessibleLabel);
   }
 
   private repeatPreviousCommand(commandManager: CommandManager): boolean | undefined {

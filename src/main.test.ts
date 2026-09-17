@@ -451,7 +451,7 @@ describe('Again', () => {
     expect(statusItem.icon).toBe('rotate-ccw');
     expect(statusItem.text).toBe(longCommandName);
     expect(statusItem.children[0]?.text).toBe(longCommandName);
-    expect(statusItem.tooltip).toBe(`Previous command: ${longCommandName}`);
+    expect(statusItem.tooltip).toBe('');
     expect(statusItem.getAttribute('aria-label')).toBe(
       `Previous command: ${longCommandName}`,
     );
@@ -702,7 +702,10 @@ describe('Again', () => {
       expect(target.callback).toHaveBeenCalledTimes(2);
       expect(launcher.callback).toHaveBeenCalledOnce();
       expect(statusItem.text).toBe('Target command');
-      expect(statusItem.tooltip).toBe('Previous command: Target command');
+      expect(statusItem.tooltip).toBe('');
+      expect(statusItem.getAttribute('aria-label')).toBe(
+        'Previous command: Target command',
+      );
     },
   );
 
@@ -840,7 +843,10 @@ describe('Again', () => {
       'Previous command is unavailable.',
     ]);
     expect(statusItem.text).toBe('Temporary command');
-    expect(statusItem.tooltip).toBe('Previous command: Temporary command');
+    expect(statusItem.tooltip).toBe('');
+    expect(statusItem.getAttribute('aria-label')).toBe(
+      'Previous command: Temporary command',
+    );
 
     addCommand(
       manager,
