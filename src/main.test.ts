@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import type { Command } from 'obsidian';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { CommandManager } from './command-execution-patch';
@@ -434,22 +435,25 @@ describe('Again', () => {
     expect(statusItem.text).toBe('');
   });
 
-  it('shows the previous command with rotate-ccw in the default status mode', async () => {
+  it('preserves a long command name while visually truncating it in the default status mode', async () => {
+    const longCommandName =
+      'Format document using the complete quarterly editorial style guide and publishing checklist';
     const { manager, statusItem } = await loadDesktopPlugin();
     const target = addCommand(
       manager,
       'example:format',
       vi.fn(),
-      'Format document',
+      longCommandName,
     );
 
     manager.executeCommandById(target.id);
 
     expect(statusItem.icon).toBe('rotate-ccw');
-    expect(statusItem.text).toBe('Format document');
-    expect(statusItem.tooltip).toBe('Previous command: Format document');
+    expect(statusItem.text).toBe(longCommandName);
+    expect(statusItem.children[0]?.text).toBe(longCommandName);
+    expect(statusItem.tooltip).toBe(`Previous command: ${longCommandName}`);
     expect(statusItem.getAttribute('aria-label')).toBe(
-      'Previous command: Format document',
+      `Previous command: ${longCommandName}`,
     );
     expect(statusItem.hidden).toBe(false);
     expect(statusItem.getAttribute('tabindex')).toBeNull();
@@ -457,6 +461,17 @@ describe('Again', () => {
     expect(statusItem.children[0]?.classes).toContain(
       'again-status-bar-command',
     );
+
+    const styles = readFileSync(
+      new URL('../styles.css', import.meta.url),
+      'utf8',
+    );
+    const commandStyles = styles.match(
+      /\.again-status-bar-command\s*\{(?<declarations>[^}]*)\}/u,
+    )?.groups?.declarations;
+    expect(commandStyles).toMatch(/^\s*overflow:\s*hidden\s*;$/mu);
+    expect(commandStyles).toMatch(/^\s*text-overflow:\s*ellipsis\s*;$/mu);
+    expect(commandStyles).toMatch(/^\s*white-space:\s*nowrap\s*;$/mu);
   });
 
   it('shows only the icon in icon-only status mode', async () => {

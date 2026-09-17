@@ -35,7 +35,7 @@ export default defineConfig(
     },
   },
   {
-    files: ['esbuild.config.mjs', 'scripts/release.ts'],
+    files: ['esbuild.config.mjs', 'scripts/release.ts', 'src/main.test.ts'],
     languageOptions: {
       globals: globals.node,
     },
