@@ -22,10 +22,10 @@ Repeat the most recently executed command.
 
 1. Enable Again.
 2. Open **Settings → Hotkeys**.
-3. Assign a shortcut to **Again: Previous command**.
+3. Assign a shortcut to **Again: Previous**.
 4. Run any repeatable Obsidian command, then use your shortcut to run it again.
 
-Again remembers one command for the current session. Repeated presses keep running the same command. The **Previous command** command, transient UI launchers, and commands invoked internally during replay do not replace the remembered command.
+Again remembers one command for the current session. Repeated presses keep running the same command. The **Previous** command, transient UI launchers, and commands invoked internally during replay do not replace the remembered command.
 
 On desktop, the status bar shows the remembered command using the `rotate-ccw` icon and command name. Choose **Hidden**, **Icon only**, or **Icon and command name** under **Settings → Again**. The status bar remains hidden until a command is remembered. Mobile remains fully supported without the desktop status item.
 

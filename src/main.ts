@@ -17,7 +17,7 @@ import {
   observeCommandPaletteSelections,
 } from './command-execution-patch';
 
-const PREVIOUS_COMMAND_ID = 'again:previous-command';
+const PREVIOUS_COMMAND_ID = 'again:previous';
 const NON_REPEATABLE_COMMAND_IDS = new Set([
   'app:open-another-vault',
   'app:open-help',
@@ -177,8 +177,8 @@ export default class AgainPlugin extends Plugin {
     }
 
     this.addCommand({
-      id: 'previous-command',
-      name: 'Previous command',
+      id: 'previous',
+      name: 'Previous',
       callback: () => this.repeatPreviousCommand(commandManager),
     });
   }

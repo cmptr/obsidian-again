@@ -249,7 +249,7 @@ vi.mock('obsidian', () => ({
 import AgainPlugin from './main';
 
 const PLUGIN_ID = 'again';
-const PREVIOUS_COMMAND_ID = `${PLUGIN_ID}:previous-command`;
+const PREVIOUS_COMMAND_ID = `${PLUGIN_ID}:previous`;
 const TRANSIENT_LAUNCHER_IDS = [
   'app:open-another-vault',
   'app:open-help',
@@ -421,7 +421,7 @@ describe('Again', () => {
     expect(commands).toHaveLength(1);
     expect(commands[0]).toMatchObject({
       id: PREVIOUS_COMMAND_ID,
-      name: 'Previous command',
+      name: 'Previous',
     });
     expect(commands[0]).not.toHaveProperty('hotkeys');
   });
@@ -666,7 +666,7 @@ describe('Again', () => {
     expect(target.callback).toHaveBeenCalledTimes(2);
   });
 
-  it('repeats the selected command when Previous command is chosen from the palette', async () => {
+  it('repeats the selected command when Previous is chosen from the palette', async () => {
     const { commandPalette, manager } = await loadPlugin();
     const target = addCommand(manager, 'example:palette-target', vi.fn());
     const openPalette = vi.fn();
