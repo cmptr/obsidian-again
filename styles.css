@@ -1,0 +1,18 @@
+.again-status-bar-item {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: var(--size-2-2);
+  color: var(--text-muted);
+
+  & > svg {
+    flex: 0 0 auto;
+  }
+}
+
+.again-status-bar-command {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
